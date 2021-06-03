@@ -6,6 +6,7 @@ import platform
 import shutil
 import csv
 import pygame
+from functools import reduce
 
 class GuiRenderer:
   '''
@@ -21,7 +22,15 @@ class GuiRenderer:
       for line in reader:
         self.sounddict[line[0]] = line[1]
         self.keylist.append(line[0])
-    
+
+  def search_and(self, search_words, target_string):
+    '''
+    AND検索
+    '''
+    result_list = [ 1 if i in target_string else 0 for i in search_words ]
+    result = reduce(lambda x, y: x*y, result_list)
+    return True if result == 1 else False
+
   def guimain(self):
     '''
     ウィンドウ描画: PySimpleGUI
@@ -43,10 +52,17 @@ class GuiRenderer:
         continue
       result = []
       #文字が入力されたら検索
+      word = str(values["input"])
+      words = word.split()
+      if not words:
+        self.window["sounds"].update(self.keylist)
+        continue
       for i in self.keylist:
-        if values["input"] in i:
+        if self.search_and(words,i) == True:
           result.append(i)
       self.window["sounds"].update(result)
+
+
 
 
 class SoundToText:
@@ -60,7 +76,7 @@ class SoundToText:
     '''
     取得した音声ファイルを整形してsoundlist.txtに書き込む
     '''
-    oggs = glob.glob("./sounds/*/*/*.ogg")
+    oggs = glob.glob("./sounds/**/*.ogg",recursive=True)
     if os.path.exists("./soundlist.txt"):
       os.remove("./soundlist.txt")
     for i in oggs:
@@ -71,6 +87,7 @@ class SoundToText:
       with open("./soundlist.txt",mode="a") as f:
         line = f"{i},{path}\n"
         f.write(line)
+
 
 class SoundExtractor:
   '''
