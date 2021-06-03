@@ -85,7 +85,6 @@ class SoundExtractor:
     '''
 
     # This section should work on any system as well
-    print("Your OS is " + platform.system())
     if platform.system() == "Windows":
         if os.path.exists(r"./assets"):
           MC_ASSETS = os.path.expandvars(r"./assets")
@@ -102,7 +101,9 @@ class SoundExtractor:
     MC_OBJECTS_PATH = f"{MC_ASSETS}/objects"
     MC_SOUNDS = r"minecraft/sounds/"
 
-
+    if not os.path.exists(MC_OBJECT_INDEX):
+      sg.Popup("エラー: 1.16.jsonが見つかりませんでした。\nバージョン1.16.xを起動してから再度試してください。",title="MCSoundPlayer")
+      exit()
     with open(MC_OBJECT_INDEX, "r") as read_file:
         # Parse the JSON file into a dictionary
         data = json.load(read_file)
@@ -114,8 +115,6 @@ class SoundExtractor:
         count = 0
         layout = [[sg.Text("初期化中...")],[sg.ProgressBar(len(sounds.items()),orientation="h",key="progress",size=(40,20))]]
         window = sg.Window("MCSoundPlayer",layout)
-        
-        
 
         for fpath, fhash in sounds.items():
             window.read(timeout=0)
